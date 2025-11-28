@@ -7,5 +7,5 @@ import logging
 async def change_status(bot):
     await bot.wait_until_ready()
     logging.info("Changing status")
-    status = "⚡ /about | ermbot.xyz"
+    status = "MSRP Punishments"
     await bot.change_presence(activity=discord.CustomActivity(name=status))

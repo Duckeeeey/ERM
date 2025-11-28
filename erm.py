@@ -279,10 +279,10 @@ class Bot(commands.AutoShardedBot):
             # await bot.load_extension('utils.server')
 
             if not bot.is_synced:  # check if slash commands have been synced
-                bot.tree.copy_global_to(guild=discord.Object(id=1442677078318121045))
+                bot.tree.copy_global_to(guild=discord.Object(id=1348758290070507612))
             if environment == "DEVELOPMENT":
                 pass
-                await bot.tree.sync(guild=discord.Object(id=1442677078318121045))
+                await bot.tree.sync(guild=discord.Object(id=1348758290070507612))
             elif environment == "CUSTOM":
                 await self.tree.sync()
                 # Prevent auto syncing

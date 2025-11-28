@@ -21,7 +21,7 @@ class OnReady(commands.Cog):
     async def on_shard_connect(self, sid: int):
         async def callback():
             try:
-                channel = await self.bot.fetch_channel(1193390631192641687)
+                channel = await self.bot.fetch_channel(1348822277999038544)
                 await channel.send(
                     embed=discord.Embed(
                         title="Shard Connection",
@@ -40,7 +40,7 @@ class OnReady(commands.Cog):
     async def on_shard_disconnect(self, sid: int):
         async def callback():
             try:
-                channel = await self.bot.fetch_channel(1193390631192641687)
+                channel = await self.bot.fetch_channel(1348822277999038544)
                 await channel.send(
                     embed=discord.Embed(
                         title="Shard Disconnection",
