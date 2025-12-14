@@ -147,9 +147,7 @@ class PRCApiClient:
             method,
             url=f"{self.base_url}{endpoint}",
             headers={
-                "Authorization": self.api_key,
-                "User-Agent": "Application",
-                "Server-Key": internal_server_key,
+                "server-key": internal_server_key,
             },
             json=data or {},
         ) as response:
@@ -198,13 +196,14 @@ class PRCApiClient:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
     async def send_test_request(self, server_key: str) -> int | ServerStatus:
-        code, response_json = await self._send_api_request(
-            "GET", "/server", 0, None, server_key
-        )
-        return (
-            code
-            if code != 200
-            else ServerStatus(
+        try:
+            code, response_json = await self._send_api_request(
+                "GET", "/server", 0, None, server_key
+            )
+            if code != 200:
+                return code
+            
+            return ServerStatus(
                 name=response_json["Name"],
                 owner_id=response_json["OwnerId"],
                 co_owner_ids=response_json["CoOwnerIds"],
@@ -214,7 +213,9 @@ class PRCApiClient:
                 account_verified_request=response_json["AccVerifiedReq"] == "Enabled",
                 team_balance=response_json["TeamBalance"],
             )
-        )
+        except (KeyError, ValueError, TypeError) as e:
+            # If there's an issue parsing the response, return the status code
+            return code if code != 200 else 500
 
     async def get_server_players(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(

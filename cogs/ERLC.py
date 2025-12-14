@@ -34,6 +34,15 @@ class ERLC(commands.Cog):
         self.bot = bot
 
     @staticmethod
+    def requires_erlc_role():
+        required_role_id = 1348812992375947334
+        async def predicate(ctx: commands.Context):
+            member = ctx.author
+            roles = getattr(member, "roles", [])
+            return any(getattr(r, "id", 0) == required_role_id for r in roles)
+        return commands.check(predicate)
+
+    @staticmethod
     def is_server_linked():
         async def predicate(ctx: commands.Context):
             guild_id = ctx.guild.id
@@ -889,6 +898,7 @@ class ERLC(commands.Cog):
         message="What would you like to send?",
     )
     @is_staff()
+    @requires_erlc_role()
     async def erlc_pm(self, ctx: commands.Context, target: str, *, message: str):
         guild_id = ctx.guild.id
         special_selections = ["moderators", "admins", "players", "staff"]
@@ -944,6 +954,7 @@ class ERLC(commands.Cog):
     )
     @is_staff()
     @is_server_linked()
+    @requires_erlc_role()
     async def erlc_message(self, ctx: commands.Context, *, message: str):
         guild_id = ctx.guild.id
 
@@ -972,6 +983,7 @@ class ERLC(commands.Cog):
     )
     @is_staff()
     @is_server_linked()
+    @requires_erlc_role()
     async def erlc_hint(self, ctx: commands.Context, *, hint: str):
         guild_id = ctx.guild.id
 
@@ -1008,14 +1020,26 @@ class ERLC(commands.Cog):
         await log_command_usage(self.bot, ctx.guild, ctx.author, f"ER:LC Link")
         status: int | ServerStatus = await self.bot.prc_api.send_test_request(key)
         if isinstance(status, int):
+            error_details = ""
+            if status == 401:
+                error_details = "\n\nCommon causes:\n• The server key is incorrect or expired\n• The API authentication failed"
+            elif status == 403:
+                error_details = "\n\nThis key may be blocked or invalid for this API."
+            elif status == 404:
+                error_details = "\n\nThe server was not found. Check that the key corresponds to an active server."
+            elif status == 503:
+                error_details = "\n\n**The PRC API server is currently unavailable.** Please try again in a few moments. This is a temporary service issue, not a problem with your key."
+            elif status >= 500:
+                error_details = f"\n\nThe API server is experiencing issues (Error {status}). Please try again later."
+            
             await (
                 ctx.send
                 if not ctx.interaction
                 else ctx.interaction.response.send_message
             )(
                 embed=discord.Embed(
-                    title="Incorrect Key",
-                    description="This Server Key is invalid and nonfunctional. Ensure you've entered it correctly.",
+                    title="Incorrect Key" if status < 500 else "Service Unavailable",
+                    description=f"This Server Key is invalid and nonfunctional. Ensure you've entered it correctly.\n\n**Error Code: {status}**{error_details}",
                     color=BLANK_COLOR,
                 ),
                 ephemeral=True,
@@ -1061,6 +1085,7 @@ class ERLC(commands.Cog):
     @app_commands.describe(command="The command to send to your ER:LC server")
     @is_management()
     @is_server_linked()
+    @requires_erlc_role()
     async def server_send_command(self, ctx: commands.Context, *, command: str):
         if command[0] != ":":
             command = ":" + command
@@ -1706,6 +1731,7 @@ class ERLC(commands.Cog):
         name="refresh", description="Refresh the author in the ER:LC server."
     )
     @is_server_linked()
+    @requires_erlc_role()
     async def refresh(self, ctx: commands.Context):
         settings = await self.bot.settings.find_by_id(ctx.guild.id) or {}
         erlc_settings = settings.get("ERLC", {})
