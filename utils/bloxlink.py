@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import aiohttp
+import logging
 
 
 class Bloxlink:
@@ -16,19 +17,47 @@ class Bloxlink:
         ) as resp:
             return (resp, await resp.json())
 
-    async def find_roblox(self, user_id: int):
+    async def find_roblox(self, user_id: int, guild_id: int):
         doc = await self.bot.oauth2_users.db.find_one({"discord_id": user_id})
         if doc:
-            return {"robloxID": doc["roblox_id"]}
+            return {"robloxID": str(doc["roblox_id"])}
 
-        response, resp_json = await self._send_request(
-            "GET", f"https://api.blox.link/v4/public/discord-to-roblox/{user_id}"
-        )
+        # Use Server API only (requires Bloxlink bot in server)
+        url = f"https://api.blox.link/v4/public/guilds/{guild_id}/discord-to-roblox/{user_id}"
 
-        if resp_json.get("error"):
-            return {}
+        masked_key = "<empty>"
+        if self.api_key:
+            if len(self.api_key) <= 8:
+                masked_key = "<set>"
+            else:
+                masked_key = f"{self.api_key[:4]}...{self.api_key[-4:]}"
+
+        logging.debug("[Bloxlink] Fetching %s (auth=%s)", url, masked_key)
+
+        response, resp_json = await self._send_request("GET", url)
+
+        if response.status != 200:
+            logging.warning(
+                "[Bloxlink] Non-200 response (%s) for guild=%s user=%s error=%s",
+                response.status,
+                guild_id,
+                user_id,
+                resp_json.get("error"),
+            )
         else:
-            return resp_json
+            logging.debug(
+                "[Bloxlink] 200 OK for guild=%s user=%s resolved=%s",
+                guild_id,
+                user_id,
+                bool(resp_json.get("robloxID")),
+            )
+        
+        # API returns {"robloxID": "...", "resolved": {}} on success
+        # or {"error": "..."} on failure
+        if response.status != 200 or resp_json.get("error") or not resp_json.get("robloxID"):
+            return {}
+        
+        return resp_json
 
     async def get_roblox_info(self, user_id: int):
         if not user_id:

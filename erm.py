@@ -278,16 +278,34 @@ class Bot(commands.AutoShardedBot):
             await bot.load_extension("utils.hot_reload")
             # await bot.load_extension('utils.server')
 
-            if not bot.is_synced:  # check if slash commands have been synced
-                bot.tree.copy_global_to(guild=discord.Object(id=1348758290070507612))
-            if environment == "DEVELOPMENT":
-                pass
-                await bot.tree.sync(guild=discord.Object(id=1348758290070507612))
+            # Slash command syncing
+            # In PRODUCTION we avoid global sync (can take 1-24h), but we *do* support
+            # fast per-guild sync when CUSTOM_GUILD_ID is provided.
+            sync_guild_id = None
+            try:
+                sync_guild_id = int(config("CUSTOM_GUILD_ID", default="0") or 0)
+            except Exception:
+                sync_guild_id = 0
+
+            if environment in {"DEVELOPMENT", "ALPHA"}:
+                # Dev: always sync quickly to the dev guild.
+                sync_guild_id = sync_guild_id or 1348758290070507612
+
+            if sync_guild_id:
+                logging.info(f"Syncing app commands to guild {sync_guild_id}")
+                target_guild = discord.Object(id=sync_guild_id)
+                bot.tree.copy_global_to(guild=target_guild)
+                await bot.tree.sync(guild=target_guild)
+                logging.info(f"App command sync complete for guild {sync_guild_id}")
             elif environment == "CUSTOM":
+                logging.info("Syncing app commands globally (CUSTOM environment)")
                 await self.tree.sync()
-                # Prevent auto syncing
-                # await bot.tree.sync()
-                # guild specific: leave blank if global (global registration can take 1-24 hours)
+                logging.info("Global app command sync complete")
+            else:
+                logging.info(
+                    "Skipping app command sync (no CUSTOM_GUILD_ID; global sync disabled in PRODUCTION)"
+                )
+
             bot.is_synced = True
 
             # we do this so the bot can get a cache of things before we spam discord with fetches
@@ -311,6 +329,9 @@ class Bot(commands.AutoShardedBot):
 
     async def start_tasks(self):
         logging.info("Starting tasks...")
+        await asyncio.sleep(30)
+        prc_automations.start(bot)
+        logging.info("Starting the ER:LC Discord Checks task...")
         check_reminders.start(bot)
         logging.info("Startng the Check Reminders task...")
         await asyncio.sleep(30)
@@ -347,9 +368,7 @@ class Bot(commands.AutoShardedBot):
         await asyncio.sleep(30)
         check_infractions.start(bot)
         logging.info("Starting the Check Infractions task...")
-        await asyncio.sleep(30)
-        prc_automations.start(bot)
-        logging.info("Starting the ER:LC Discord Checks task...")
+        
         await asyncio.sleep(30)
         mc_discord_checks.start(bot)
         logging.info("Starting the MC Discord Checks task...")

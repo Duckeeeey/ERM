@@ -13,83 +13,76 @@ class OAuth2(commands.Cog):
 
     @commands.hybrid_command(
         name="link",
-        description="Link your Roblox account with ERM.",
+        description="Link your Roblox account with ERM using Bloxlink.",
         extras={"ephemeral": True},
     )
     async def link_roblox(self, ctx: commands.Context):
-        msg = None
-        linked_account = await self.bot.oauth2_users.db.find_one(
+        # Check if user already has an OAuth2 link
+        existing_oauth = await self.bot.oauth2_users.db.find_one(
             {"discord_id": ctx.author.id}
         )
-        if linked_account:
-            user = await self.bot.roblox.get_user(linked_account["roblox_id"])
-            msg = await ctx.send(
+        
+        if existing_oauth:
+            user = await self.bot.roblox.get_user(existing_oauth["roblox_id"])
+            await ctx.send(
                 embed=discord.Embed(
                     title="Already Linked",
-                    description=f"You have already linked your account with `{user.name}`. Are you sure you would like to relink?",
+                    description=f"You are already linked to `{user.name}`. This command uses Bloxlink verification. Open a ticket if this needs to be changed.",
                     color=BLANK_COLOR,
-                ),
-                view=(view := YesNoMenu(ctx.author.id)),
-            )
-            timeout = await view.wait()
-            if timeout or not view.value:
-                await msg.edit(
-                    embed=discord.Embed(
-                        title="Cancelled",
-                        description="This action was cancelled by the user.",
-                        color=BLANK_COLOR,
-                    ),
-                    view=None,
                 )
-                return
-        timestamp = time.time()
-        verification_message = {
-            "embed": discord.Embed(
-                title="Verify with ERM",
-                description="**To link your account with ERM, click the button below.**\nIf you encounter an error, please contact ERM Support by running `/support`.",
-                color=BLANK_COLOR,
-            ),
-            "view": AccountLinkingMenu(self.bot, ctx.author, ctx.interaction),
-        }
+            )
+            return
 
-        await self.bot.pending_oauth2.db.insert_one({"discord_id": ctx.author.id})
+        # Fetch from Bloxlink API using Server API
+        bloxlink_data = await self.bot.bloxlink.find_roblox(ctx.author.id, ctx.guild.id)
+        
+        # Debug logging
+        print(f"[DEBUG] Bloxlink response for {ctx.author.id}: {bloxlink_data}")
+        
+        if not bloxlink_data or not bloxlink_data.get("robloxID"):
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Not Linked",
+                    description=f"You are not linked with Bloxlink. Please verify your account at https://blox.link and try again.\n\nDebug: {bloxlink_data}",
+                    color=BLANK_COLOR,
+                )
+            )
+            return
 
-        if msg is None:
-            await ctx.send(**verification_message)
-        else:
-            await msg.edit(**verification_message)
-
-        attempts = 0
-        while await asyncio.sleep(3):
-            if attempts > 60:
-                break
-            if not linked_account:
-                if await self.bot.oauth2_users.db.find_one(
-                    {"discord_id": ctx.author.id}
-                ):
-                    await msg.edit(
-                        embed=discord.Embed(
-                            title=f"{self.bot.emoji_controller.get_emoji('success')} Linked",
-                            description="Your Roblox account has been successfully linked to ERM.",
-                            color=GREEN_COLOR,
-                        )
-                    )
-                    break
-            else:
-                if item := await self.bot.oauth2_users.db.find_one(
-                    {"discord_id": ctx.author.id}
-                ):
-                    if item.get("last_updated", 0) > timestamp:
-                        await msg.edit(
-                            embed=discord.Embed(
-                                title=f"{self.bot.emoji_controller.get_emoji('success')} Linked",
-                                description="Your Roblox account has been successfully linked to ERM.",
-                                color=GREEN_COLOR,
-                            )
-                        )
-                        break
-                else:
-                    linked_account = None
+        roblox_id = bloxlink_data["robloxID"]
+        
+        try:
+            # robloxID is returned as string, convert to int for storage
+            user = await self.bot.roblox.get_user(int(roblox_id))
+            
+            # Store in oauth2_users collection for compatibility
+            await self.bot.oauth2_users.db.update_one(
+                {"discord_id": ctx.author.id},
+                {
+                    "$set": {
+                        "discord_id": ctx.author.id,
+                        "roblox_id": int(roblox_id),
+                        "last_updated": time.time(),
+                    }
+                },
+                upsert=True,
+            )
+            
+            await ctx.send(
+                embed=discord.Embed(
+                    title=f"{self.bot.emoji_controller.get_emoji('success')} Linked",
+                    description=f"Your Roblox account `{user.name}` has been successfully linked via Bloxlink.",
+                    color=GREEN_COLOR,
+                )
+            )
+        except Exception as e:
+            await ctx.send(
+                embed=discord.Embed(
+                    title="Error",
+                    description=f"Failed to link your account: {e}",
+                    color=BLANK_COLOR,
+                )
+            )
 
 
 async def setup(bot):

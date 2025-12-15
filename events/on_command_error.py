@@ -313,12 +313,18 @@ class OnCommandError(commands.Cog):
 
 
             if not do_not_send:
+                sentry_base_url = config("SENTRY_BASE_URL", default="")
+                if sentry_base_url and error_link:
+                    error_id_value = f"[`{error_id}`]({sentry_base_url + error_link})"
+                else:
+                    error_id_value = f"`{error_id}`"
+
                 await ctx.send(
                     embed=discord.Embed(
                         title=f"{self.bot.emoji_controller.get_emoji('error')} Command Failure",
                         description="The command you were attempting to run failed.\nContact ERM Support for assistance.",
                         color=RED_COLOR,
-                    ).add_field(name="Error ID", value=f"[`{error_id}`]({config('SENTRY_BASE_URL') + error_link})", inline=False),
+                    ).add_field(name="Error ID", value=error_id_value, inline=False),
                     view=View().add_item(
                         Button(
                             label="Contact ERM Support",

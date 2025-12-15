@@ -126,6 +126,7 @@ async def process_discord_checks(bot, items, guild_id):
     This function will process Discord checks for PRC servers.
     """
     try:
+        logging.info(f"[DiscordChecks] Starting discord check for guild={guild_id}")
         settings = items["ERLC"].get("discord_checks", {})
         if not settings:
             return
@@ -134,9 +135,9 @@ async def process_discord_checks(bot, items, guild_id):
             return
         
         message = settings.get("message", "Please join the Private Server Communication channel.")
-        channel_id = settings.get("channel_id", 0)
+        channel_id = settings.get("channel_id") or 0  # treat None/""/0 as disabled
         channel = None
-        if channel_id != 0:
+        if channel_id:
             channel = await get_cached_channel(bot, channel_id)
             if not channel:
                 logging.error(f"Channel {channel_id} not found in guild {guild_id}.")
@@ -160,7 +161,16 @@ async def process_discord_checks(bot, items, guild_id):
         callsign_violations = []
         
         for player in players:
-            member = await get_cached_member_by_username(guild, player.username)
+            try:
+                member = await bot.accounts.roblox_to_discord(
+                    guild, player.username, roblox_user_id=int(player.id)
+                )
+            except Exception as e:
+                logging.error(
+                    f"[DiscordChecks] Error resolving Discord member for {player.username} ({player.id}) in guild {guild_id}: {e}"
+                )
+                member = None
+
             if not member:
                 not_in_discord.append(player)
             #======WILL BE IMPLEMENTED IN NEXT UPDATE======
@@ -175,6 +185,9 @@ async def process_discord_checks(bot, items, guild_id):
             kick_after = 0
 
         if not_in_discord:
+            logging.info(
+                f"[DiscordChecks] Found {len(not_in_discord)} players not in Discord for guild={guild_id}"
+            )
             await handle_discord_check_batch(bot, guild, not_in_discord, channel, message, kick_after)
         
         if callsign_violations:
@@ -247,7 +260,12 @@ async def handle_discord_check_batch(bot, guild, players_not_in_discord, alert_c
         usernames = [player.username for player in players_not_in_discord]
         command = f":pm {','.join(usernames)} {alert_message}"
 
-        await bot.prc_api.run_command(guild.id, command)
+        status_code, response_json = await bot.prc_api.run_command(guild.id, command)
+        if status_code != 200:
+            logging.warning(
+                f"Discord check PM failed | guild={guild.id} status={status_code} response={response_json}"
+            )
+            return
 
         if not hasattr(bot, 'discord_check_counter'):
             bot.discord_check_counter = {}

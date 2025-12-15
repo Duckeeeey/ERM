@@ -243,6 +243,5 @@ class Utility(commands.Cog):
                     ephemeral=isinstance(ctx.interaction, discord.Interaction),
                 )
 
-
 async def setup(bot):
     await bot.add_cog(Utility(bot))
