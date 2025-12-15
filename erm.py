@@ -1,4 +1,5 @@
 import datetime
+import sys
 import json
 import logging
 import time
@@ -107,6 +108,7 @@ except decouple.UndefinedValueError:
     sentry_url = ""
     bloxlink_api_key = ""
 
+logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)], force=True)
 discord.utils.setup_logging(level=logging.INFO)
 
 intents = discord.Intents.default()
