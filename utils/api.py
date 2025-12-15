@@ -14,16 +14,9 @@ import discord
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from erm import (
-    Bot,
-    management_predicate,
-    is_staff,
-    staff_predicate,
-    staff_check,
-    management_check,
-    admin_check,
-)
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
+if TYPE_CHECKING:
+    from erm import Bot
 from decouple import config
 import copy
 from menus import LOAMenu
