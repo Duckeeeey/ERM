@@ -409,6 +409,10 @@ def running():
 
 @bot.before_invoke
 async def AutoDefer(ctx: commands.Context):
+    # If invoked in DMs, skip guild-specific whitelabel checks and defer behavior
+    if ctx.guild is None:
+        return
+
     if (
         environment == "CUSTOM"
         and config("CUSTOM_GUILD_ID", default=None) != 0
