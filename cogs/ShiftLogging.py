@@ -44,7 +44,7 @@ class ShiftLogging(commands.Cog):
     @commands.hybrid_group(
         name="shift"
     ) # hey, maybe dont delete this next time noagonzales.
-    async def duty(self, ctx):
+    async def shift(self, ctx):
         pass
     
 
