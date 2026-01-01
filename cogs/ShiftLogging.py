@@ -305,7 +305,7 @@ class ShiftLogging(commands.Cog):
                 inline=False,
             )
             embed.title = (
-                f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **On-Duty**"
+                f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **On-Shift**"
             )
         elif status == "break":
             contained_document: ShiftItem = await self.bot.shift_management.fetch_shift(
@@ -342,7 +342,7 @@ class ShiftLogging(commands.Cog):
         else:
             embed.colour = RED_COLOR
             embed.title = (
-                f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**"
+                f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Shift**"
             )
         try:
             view = AdministratedShiftMenu(
@@ -490,7 +490,7 @@ class ShiftLogging(commands.Cog):
                 return await ctx.send(
                     embed=discord.Embed(
                         title="Staff Limit Reached",
-                        description="The maximum amount of staff members on duty has been reached.",
+                        description="The maximum amount of staff members on shift has been reached.",
                         color=BLANK_COLOR,
                     )
                 )
@@ -546,7 +546,7 @@ class ShiftLogging(commands.Cog):
                 inline=False,
             )
             embed.title = (
-                f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **On-Duty**"
+                f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **On-Shift**"
             )
         elif status == "break":
             print("On Break status called")
@@ -590,7 +590,7 @@ class ShiftLogging(commands.Cog):
         else:
             embed.colour = RED_COLOR
             embed.title = (
-                f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**"
+                f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Shift**"
             )
 
         view = ShiftMenu(

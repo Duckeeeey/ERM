@@ -493,7 +493,7 @@ class Configuration(commands.Cog):
         shift_role_view = RoleSelect(ctx.author.id, limit=5)
         shift_role_select = shift_role_view.children[0]
         shift_role_select.row = 2
-        shift_role_select.placeholder = "On-Duty Role"
+        shift_role_select.placeholder = "On-Shift Role"
         shift_channel_select.min_values = 0
 
         next_menu = NextView(bot, ctx.author.id)
@@ -517,7 +517,7 @@ class Configuration(commands.Cog):
                     "**What is Shift Management?** The Shift Management module allows for staff members to log how much time they were in-game, or moderating, or on as a staff member. It allows for a comprehensive guide of who is the most active in your staff team.\n\n"
                     "**Enabled:** When enabled, staff members will be able to run `/shift` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
                     "**Shift Channel:** This is where all shift logs will go to. This channel will be used for all modifications to shifts, any person that may be starting or ending their shift.\n\n"
-                    "**On-Duty Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
+                    "**On-Shift Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
                 ),
                 color=blank_color,
             ),
@@ -539,7 +539,7 @@ class Configuration(commands.Cog):
                         )
                     elif item.placeholder == "Shift Channel":
                         modifications["shift_management"]["channel"] = item.values[0].id
-                    elif item.placeholder == "On-Duty Role":
+                    elif item.placeholder == "On-Shift Role":
                         modifications["shift_management"]["role"] = [
                             role.id for role in item.values
                         ]
@@ -658,7 +658,7 @@ class Configuration(commands.Cog):
             ctx.author.id,
             [
                 (
-                    "On-Duty Role",
+                    "On-Shift Role",
                     [
                         discord.utils.get(ctx.guild.roles, id=role)
                         for role in (settings["shift_management"].get("role") or [0])
@@ -1035,7 +1035,7 @@ class Configuration(commands.Cog):
                         "**What is Shift Management?** The Shift Management module allows for staff members to log how much time they were in-game, or moderating, or on as a staff member. It allows for a comprehensive guide of who is the most active in your staff team.\n\n"
                         "**Enabled:** When enabled, staff members will be able to run `/shift` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
                         "**Shift Channel:** This is where all shift logs will go to. This channel will be used for all modifications to shifts, any person that may be starting or ending their shift.\n\n"
-                        "**On-Duty Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
+                        "**On-Shift Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
                     ),
                     color=blank_color,
                 ),
@@ -1197,7 +1197,7 @@ class Configuration(commands.Cog):
             discord.Embed(
                 title="Shift Logging",
                 description=(
-                    'Shift Logging allow for an easy experience for staff members looking to log their active shift time using ERM. Staff members can run simple commands to go "on-duty", as well as go on break to signify unavailability. Once they are ready, they can go "off-duty" to signify that they are no longer available for any administrative action.\n\n'
+                    'Shift Logging allow for an easy experience for staff members looking to log their active shift time using ERM. Staff members can run simple commands to go "on shift", as well as go on break to signify unavailability. Once they are ready, they can go "off shift" to signify that they are no longer available for any administrative action.\n\n'
                     "Using this panel, you can **Erase All Shifts**, as well as utilise **Erase Past Shifts** and **Erase Active Shifts**. You can also **Erase Shifts By Type**."
                 ),
                 color=BLANK_COLOR,
