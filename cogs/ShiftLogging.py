@@ -42,14 +42,14 @@ class ShiftLogging(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_group(
-        name="duty"
+        name="shift"
     ) # hey, maybe dont delete this next time noagonzales.
     async def duty(self, ctx):
         pass
     
 
     @commands.guild_only()
-    @duty.command(
+    @shift.command(
         name="time",
         description="Allows you to check your shift time, as well as past data.",
         extras={"category": "Shift Management"},
@@ -162,7 +162,7 @@ class ShiftLogging(commands.Cog):
         else:
             await ctx.reply(embed=embed)
 
-    @duty.command(
+    @shift.command(
         name="admin",
         description="Allows for you to administrate someone else's shift",
         extras={"category": "Shift Management"},
@@ -372,7 +372,7 @@ class ShiftLogging(commands.Cog):
             view.message = msg
 
     @commands.guild_only()
-    @duty.command(
+    @shift.command(
         name="manage",
         description="Manage your own shift in an easy way!",
         extras={"category": "Shift Management"},
@@ -608,7 +608,7 @@ class ShiftLogging(commands.Cog):
             await msg.edit(embed=embed, view=view)
             view.message = msg
 
-    @duty.command(
+    @shift.command(
         name="active",
         description="Get all members of the server currently on shift.",
         extras={"category": "Shift Management"},
@@ -829,7 +829,7 @@ class ShiftLogging(commands.Cog):
             await ctx.reply(embed=embeds[0], view=paginator.get_current_view())
 
     @commands.guild_only()
-    @duty.command(
+    @shift.command(
         name="leaderboard",
         description="Get the total time worked for the whole of the staff team.",
         extras={"category": "Shift Management"},
@@ -1328,7 +1328,7 @@ class ShiftLogging(commands.Cog):
                 menu.message = await ctx.reply(embed=embeds[0], view=view_page)
 
     @commands.guild_only()
-    @duty.command(
+    @shift.command(
         name="history",
         description="Show all past shifts of user by shift type",
         extras={"category": "Shift Management"},
