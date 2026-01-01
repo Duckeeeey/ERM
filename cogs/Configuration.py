@@ -515,7 +515,7 @@ class Configuration(commands.Cog):
                 title=f"{self.bot.emoji_controller.get_emoji('shift')} Shift Management",
                 description=(
                     "**What is Shift Management?** The Shift Management module allows for staff members to log how much time they were in-game, or moderating, or on as a staff member. It allows for a comprehensive guide of who is the most active in your staff team.\n\n"
-                    "**Enabled:** When enabled, staff members will be able to run `/duty` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
+                    "**Enabled:** When enabled, staff members will be able to run `/shift` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
                     "**Shift Channel:** This is where all shift logs will go to. This channel will be used for all modifications to shifts, any person that may be starting or ending their shift.\n\n"
                     "**On-Duty Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
                 ),
@@ -1033,7 +1033,7 @@ class Configuration(commands.Cog):
                     title="Shift Management",
                     description=(
                         "**What is Shift Management?** The Shift Management module allows for staff members to log how much time they were in-game, or moderating, or on as a staff member. It allows for a comprehensive guide of who is the most active in your staff team.\n\n"
-                        "**Enabled:** When enabled, staff members will be able to run `/duty` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
+                        "**Enabled:** When enabled, staff members will be able to run `/shift` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
                         "**Shift Channel:** This is where all shift logs will go to. This channel will be used for all modifications to shifts, any person that may be starting or ending their shift.\n\n"
                         "**On-Duty Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
                     ),
@@ -1109,7 +1109,7 @@ class Configuration(commands.Cog):
                     color=blank_color,
                     description=(
                         "**ERM Log Channel:** This channel is where ERM will log all administrative commands and configuration changes made by Admin & Management Roles. This is useful for auditing purposes, ensuring transparency, and detecting any potential abuse of administrative privileges. This is a critical part of ERM and should be enabled for all servers using ERM.\n\n"
-                        "All commands such as Duty Admin, LOA Admin, RA Admin, Server Manage, Config, etc., as well as nearly all configuration changes, will be logged in this channel."
+                        "All commands such as Shift Admin, LOA Admin, RA Admin, Server Manage, Config, etc., as well as nearly all configuration changes, will be logged in this channel."
                     ),
                 ),
                 discord.Embed(
