@@ -4341,7 +4341,7 @@ class RequestGoogleSpreadsheet(discord.ui.View):
 #     ):
 #         if command is None:
 #             # assume default
-#             command = self.bot.get_command("duty manage")
+#             command = self.bot.get_command("shift manage")
 #         mockinteraction = copy(interaction)
 #         mockinteraction._cs_command = command
 #         mockinteraction.user = self.context.author
