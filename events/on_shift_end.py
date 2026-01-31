@@ -23,8 +23,8 @@ class OnShiftEnd(commands.Cog):
             return
         shift: ShiftItem = await self.bot.shift_management.fetch_shift(object_id)
 
-        url_var = config("BASE_API_URL")
-        panel_url_var = config("PANEL_API_URL")
+        url_var = config("BASE_API_URL", default="")
+        panel_url_var = config("PANEL_API_URL", default="")
 
         guild_id = document["Guild"]
         

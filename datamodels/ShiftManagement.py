@@ -109,8 +109,8 @@ class ShiftManagement:
 
         await self.shifts.db.insert_one(data)
 
-        url_var = config("BASE_API_URL")
-        panel_url_var = config("PANEL_API_URL")
+        url_var = config("BASE_API_URL", default="")
+        panel_url_var = config("PANEL_API_URL", default="")
 
         async def sync_with_apis():
             async with aiohttp.ClientSession() as session:
