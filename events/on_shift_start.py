@@ -10,7 +10,7 @@ class OnShiftStart(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_shift_start(self, object_id: ObjectId):
+    async def on_shift_start(self, object_id: ObjectId, interaction: discord.Interaction = None):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)
         if not document:
@@ -70,10 +70,17 @@ class OnShiftStart(commands.Cog):
         for role in assigned_roles or []:
             discord_role: discord.Role = discord.utils.get(guild_roles, id=role)
             if discord_role is None:
+                print(f"Role with ID {role} not found in guild {guild.id}")
+                if interaction:
+                    await interaction.followup.send(f"⚠️ Configured shift role <@&{role}> not found in guild", ephemeral=True)
                 continue
             try:
                 await staff_member.add_roles(discord_role, atomic=True)
-            except discord.HTTPException:
+                print(f"Successfully added role {discord_role.name} ({role}) to {staff_member}")
+            except discord.HTTPException as e:
+                print(f"Failed to add role {discord_role.name} ({role}) to {staff_member}: {e}")
+                if interaction:
+                    await interaction.followup.send(f"⚠️ Failed to add role {discord_role.mention} to {staff_member.mention}: {e}", ephemeral=True)
                 pass
 
         if nickname_prefix not in [None, "", "none"]:
